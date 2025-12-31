@@ -1,13 +1,13 @@
 # NovaBar
 
-A modern, modular macOS-style panel for Linux (X11/XFCE) built with Vala and GTK3.
+A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 
 ![NovaBar Screenshot](Screenshots/1.png)
 
 ## Features
 
 ### Core Components
-- **Global Menu Bar** - Application menus integrated into the panel (like macOS)
+- **Global Menu Bar** - Application menus integrated into the panel (X11), focused window title (Wayland)
 - **Logo Menu** - System actions menu with Nova branding
 - **System Indicators** - Network, Bluetooth, Sound, Battery, DateTime, Notifications
 - **Control Center** - Quick access to system settings
@@ -15,10 +15,11 @@ A modern, modular macOS-style panel for Linux (X11/XFCE) built with Vala and GTK
 
 ### Key Features
 - **macOS-style Design** - Clean, modern interface with transparency effects
-- **Global Menu Integration** - Application menus appear in the panel instead of windows
+- **X11 & Wayland Support** - Native support for both display servers
+- **Global Menu Integration** - Application menus appear in the panel (X11)
+- **Window Tracking** - Shows focused window on Wayland via wlr-foreign-toplevel
 - **System Tray Replacement** - Modern indicators replace traditional system tray
 - **Theme Support** - Dark and light themes with CSS customization
-- **X11 Integration** - Proper window management and strut reservation
 - **Modular Architecture** - Easy to extend with new indicators and components
 
 ## Screenshots
@@ -38,20 +39,25 @@ A modern, modular macOS-style panel for Linux (X11/XFCE) built with Vala and GTK
 - GLib 2.0
 - GIO 2.0
 - GDK X11 3.0
-- libwnck 3.0
+- libwnck 3.0 (X11 window tracking)
 - X11
 - NetworkManager (libnm)
+
+### Wayland Dependencies (optional)
+- gtk-layer-shell (panel positioning)
+- wayland-client (protocol support)
 
 ### Build Dependencies
 - Vala compiler
 - Meson build system
 - Ninja build tool
 - pkg-config
+- wayland-scanner (for Wayland support)
 
 ### Runtime Requirements
-- X11 window system
+- X11 or Wayland (wlroots-based: labwc, sway, wayfire, etc.)
 - XFCE or compatible desktop environment
-- appmenu-gtk-module (for global menu support)
+- appmenu-gtk-module (for global menu support on X11)
 
 ## Installation
 
@@ -62,7 +68,14 @@ A modern, modular macOS-style panel for Linux (X11/XFCE) built with Vala and GTK
 sudo apt install valac meson ninja-build pkg-config \
     libgtk-3-dev libglib2.0-dev libgio2.0-dev \
     libgdk-x11-3.0-dev libwnck-3-dev libx11-dev \
-    libnm-dev appmenu-gtk-module
+    libnm-dev appmenu-gtk-module \
+    libgtk-layer-shell-dev libwayland-dev
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S vala meson ninja pkgconf gtk3 libwnck3 \
+    networkmanager gtk-layer-shell wayland
 ```
 
 2. **Clone and build**:
@@ -73,12 +86,18 @@ meson setup build
 ninja -C build
 ```
 
-3. **Install**:
+3. **Build without Wayland** (X11 only):
+```bash
+meson setup build -Dwayland=false
+ninja -C build
+```
+
+4. **Install**:
 ```bash
 sudo ninja -C build install
 ```
 
-4. **Run**:
+5. **Run**:
 ```bash
 novabar
 ```
@@ -101,7 +120,7 @@ EOF
 
 ## Configuration
 
-### Global Menu Setup
+### Global Menu Setup (X11)
 
 For applications to show menus in the panel:
 
@@ -118,6 +137,19 @@ export APPMENU_DISPLAY_BOTH=1
 
 Add to `~/.profile` or `~/.xsessionrc` for persistence.
 
+### Wayland Setup
+
+NovaBar automatically detects Wayland and uses:
+- **gtk-layer-shell** for panel positioning
+- **wlr-foreign-toplevel-management** for window tracking
+
+Supported compositors:
+- labwc
+- sway
+- wayfire
+- Hyprland
+- Other wlroots-based compositors
+
 ### Theme Customization
 
 NovaBar includes two built-in themes:
@@ -133,31 +165,41 @@ NovaBar/
 ├── src/
 │   ├── main.vala              # Application entry point
 │   ├── panel.vala             # Main panel window and layout
+│   ├── backend/               # X11/Wayland abstraction
+│   │   ├── backend.vala       # Runtime detection
+│   │   ├── x11.vala           # X11 panel setup
+│   │   ├── wayland.vala       # Wayland panel setup
+│   │   └── popup.vala         # Cross-platform popups
+│   ├── toplevel/              # Window tracking
+│   │   ├── tracker.vala       # Abstract interface
+│   │   ├── x11.vala           # libwnck tracking
+│   │   └── wayland.vala       # wlr-foreign-toplevel
+│   ├── wayland/               # Wayland protocol code
+│   │   ├── wlr-toplevel.c     # Protocol implementation
+│   │   ├── wlr-toplevel.h     # Header
+│   │   └── wlr-toplevel.vapi  # Vala bindings
 │   ├── globalmenu/            # Global menu integration
-│   │   ├── menubar.vala       # GTK global menu widget
-│   │   └── README.md          # Global menu documentation
 │   ├── logomenu/              # Nova logo menu
-│   │   ├── logomenu.vala      # System actions menu
-│   │   └── README.md          # Logo menu documentation
 │   ├── indicators/            # System indicators
-│   │   ├── network/           # Network status indicator
-│   │   ├── bluetooth/         # Bluetooth indicator
-│   │   ├── sound/             # Volume control
-│   │   ├── battery/           # Battery status
-│   │   ├── datetime/          # Clock and calendar
-│   │   ├── notifications/     # Notification center
-│   │   └── controlcenter/     # Quick settings
+│   │   ├── network/
+│   │   ├── bluetooth/
+│   │   ├── sound/
+│   │   ├── battery/
+│   │   ├── datetime/
+│   │   ├── notifications/
+│   │   └── controlcenter/
 │   ├── settings/              # Configuration interface
-│   │   └── settings.vala      # Settings window
 │   └── about/                 # About dialog
-│       └── about.vala         # Application information
+├── protocols/                 # Wayland protocol XML
 ├── data/
 │   ├── novaos.css             # Dark theme stylesheet
 │   └── novaos-light.css       # Light theme stylesheet
-├── Screenshots/               # Application screenshots
-├── meson.build                # Build configuration
-├── LICENCE.md                 # GPL-3.0 license
-└── README.md                  # This file
+├── Screenshots/
+├── meson.build
+├── meson_options.txt
+├── CHANGELOG.md
+├── LICENCE.md
+└── README.md
 ```
 
 ## Development
@@ -186,15 +228,20 @@ ninja -C build
 
 ## Troubleshooting
 
-### Global Menu Not Working
+### Global Menu Not Working (X11)
 - Ensure `appmenu-gtk-module` is installed
 - Check environment variables are set
 - Restart applications after setup
 
 ### Panel Not Appearing
-- Check X11 compatibility
+- Check X11/Wayland compatibility
 - Verify dependencies are installed
 - Run from terminal to see error messages
+
+### Wayland Issues
+- Ensure compositor supports wlr-foreign-toplevel-management
+- Check gtk-layer-shell is installed
+- Verify wayland-client is available
 
 ### High CPU Usage
 - Check for window manager conflicts
@@ -206,18 +253,20 @@ ninja -C build
 1. Fork the repository
 2. Create feature branch
 3. Make changes following code style
-4. Test thoroughly
+4. Test thoroughly on both X11 and Wayland
 5. Submit pull request
 
 ## License
 
-GPL-3.0 - See [LICENCE](LICENCE) for details.
+GPL-3.0 - See [LICENCE](LICENCE.md) for details.
 
 ## Credits
 
 - Built with Vala and GTK3
 - Inspired by macOS design principles
-- Uses libwnck for window management
+- Uses libwnck for X11 window management
+- Uses gtk-layer-shell for Wayland support
+- Uses wlr-foreign-toplevel-management for Wayland window tracking
 - NetworkManager integration for network status
 
 ---

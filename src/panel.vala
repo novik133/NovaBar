@@ -3,6 +3,8 @@
  */
 
 public class NovaPanel : Gtk.Window {
+    private const int PANEL_HEIGHT = 28;
+    
     private Gtk.Box container;
     private Gtk.Box left_box;
     private Gtk.Box center_box;
@@ -12,12 +14,21 @@ public class NovaPanel : Gtk.Window {
     public NovaPanel(Gtk.Application app) {
         Object(application: app);
         
+        // Wayland: must init layer-shell BEFORE realize
+        if (Backend.is_wayland()) {
+            Backend.Wayland.setup_panel_window(this, PANEL_HEIGHT);
+        }
+        
         set_decorated(false);
         set_skip_taskbar_hint(true);
         set_skip_pager_hint(true);
-        set_type_hint(Gdk.WindowTypeHint.DOCK);
         set_keep_above(true);
         stick();
+        
+        // X11: setup after window hints
+        if (Backend.is_x11()) {
+            Backend.X11.setup_panel_window(this, PANEL_HEIGHT);
+        }
         
         setup_geometry();
         setup_layout();
@@ -31,23 +42,12 @@ public class NovaPanel : Gtk.Window {
         var monitor = display.get_primary_monitor() ?? display.get_monitor(0);
         var geom = monitor.get_geometry();
         
-        set_default_size(geom.width, 28);
-        move(geom.x, geom.y);
+        set_default_size(geom.width, PANEL_HEIGHT);
         
-        realize.connect(() => reserve_strut(geom));
-    }
-    
-    private void reserve_strut(Gdk.Rectangle geom) {
-        var window = get_window();
-        if (window == null) return;
-        
-        var xwin = (Gdk.X11.Window)window;
-        unowned X.Display xdisplay = ((Gdk.X11.Display)get_display()).get_xdisplay();
-        var xid = xwin.get_xid();
-        
-        long strut[12] = { 0, 0, 28, 0, 0, 0, 0, 0, geom.x, geom.x + geom.width - 1, 0, 0 };
-        var atom = xdisplay.intern_atom("_NET_WM_STRUT_PARTIAL", false);
-        xdisplay.change_property((X.Window)xid, atom, X.XA_CARDINAL, 32, X.PropMode.Replace, (uchar[])strut, 12);
+        // Only move window on X11, Wayland uses layer-shell anchors
+        if (Backend.is_x11()) {
+            move(geom.x, geom.y);
+        }
     }
     
     private void setup_layout() {

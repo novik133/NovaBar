@@ -94,7 +94,6 @@ namespace Indicators {
             
             if (nm_client.wireless_get_enabled()) {
                 icon.set_from_icon_name("network-wireless-symbolic", Gtk.IconSize.MENU);
-            } else {
                 icon.set_from_icon_name("network-wireless-disabled-symbolic", Gtk.IconSize.MENU);
             }
         }
@@ -107,13 +106,11 @@ namespace Indicators {
         
         public NetworkPopup(NM.Client? client, NM.DeviceWifi? wifi) {
             Object(type: Gtk.WindowType.POPUP);
+            Backend.setup_popup(this, 28);
             
             this.nm_client = client;
             this.wifi_device = wifi;
             
-            set_decorated(false);
-            set_skip_taskbar_hint(true);
-            set_skip_pager_hint(true);
             set_keep_above(true);
             set_app_paintable(true);
             
@@ -173,19 +170,20 @@ namespace Indicators {
         private void ungrab_input() {
             var display = Gdk.Display.get_default();
             var seat = display.get_default_seat();
-            seat.ungrab();
+            if (seat != null) seat.ungrab();
         }
         
         public void show_at(int x, int y) {
             show_all();
-            int width, height;
-            get_size(out width, out height);
-            move(x - width / 2, y);
+            Backend.position_popup(this, x, y, 28);
             
-            // Grab pointer and keyboard to detect outside clicks
-            var display = Gdk.Display.get_default();
-            var seat = display.get_default_seat();
-            seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+            if (Backend.is_x11()) {
+                var display = Gdk.Display.get_default();
+                var seat = display.get_default_seat();
+                if (seat != null && get_window() != null) {
+                    seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+                }
+            }
             
             present();
         }

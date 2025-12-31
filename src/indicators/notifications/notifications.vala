@@ -42,13 +42,11 @@ namespace Indicators {
     }
     
     public class NotificationManager : Object {
-        private Gdk.Screen screen;
         private int panel_height = 28;
         private GenericArray<NotificationPopup> popups;
         
         public NotificationManager() {
             popups = new GenericArray<NotificationPopup>();
-            screen = Gdk.Screen.get_default();
         }
         
         public void show_notification(uint32 id, string app_name, string icon,
@@ -87,11 +85,18 @@ namespace Indicators {
         }
         
         private void position_popups() {
-            int x = screen.get_width() - 360;
-            int y = panel_height + 8;
+            var display = Gdk.Display.get_default();
+            var monitor = display.get_primary_monitor() ?? display.get_monitor(0);
+            var geom = monitor.get_geometry();
+            
+            int x = geom.x + geom.width - 360;
+            int y = geom.y + panel_height + 8;
             
             for (int i = 0; i < popups.length; i++) {
-                popups[i].move(x, y);
+                if (Backend.is_x11()) {
+                    popups[i].move(x, y);
+                }
+                // On Wayland, notifications use layer-shell positioning set in constructor
                 int w, h;
                 popups[i].get_size(out w, out h);
                 y += h + 8;
@@ -108,9 +113,7 @@ namespace Indicators {
             Object(type: Gtk.WindowType.POPUP);
             this.id = id;
             
-            set_decorated(false);
-            set_skip_taskbar_hint(true);
-            set_skip_pager_hint(true);
+            Backend.setup_popup(this, 28);
             set_keep_above(true);
             set_app_paintable(true);
             

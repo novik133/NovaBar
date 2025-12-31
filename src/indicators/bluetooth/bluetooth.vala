@@ -27,7 +27,6 @@ namespace Indicators {
                 Process.spawn_command_line_sync("bluetoothctl show", out output, null, null);
                 if (output.contains("Powered: yes")) {
                     icon.set_from_icon_name("bluetooth-active-symbolic", Gtk.IconSize.MENU);
-                } else {
                     icon.set_from_icon_name("bluetooth-disabled-symbolic", Gtk.IconSize.MENU);
                 }
             } catch (Error e) {}
@@ -59,11 +58,9 @@ namespace Indicators {
         
         public BluetoothPopup(Bluetooth ind) {
             Object(type: Gtk.WindowType.POPUP);
+            Backend.setup_popup(this, 28);
             this.indicator = ind;
             
-            set_decorated(false);
-            set_skip_taskbar_hint(true);
-            set_skip_pager_hint(true);
             set_keep_above(true);
             set_app_paintable(true);
             
@@ -111,16 +108,18 @@ namespace Indicators {
         
         private void ungrab() {
             var seat = Gdk.Display.get_default().get_default_seat();
-            seat.ungrab();
+            if (seat != null) seat.ungrab();
         }
         
         public void show_at(int x, int y) {
             show_all();
             int w, h;
             get_size(out w, out h);
-            move(x - w / 2, y);
+            Backend.position_popup(this, x, y, 28);
             var seat = Gdk.Display.get_default().get_default_seat();
-            seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+            if (Backend.is_x11() && seat != null && get_window() != null) {
+                seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+            }
             present();
         }
         
@@ -177,7 +176,6 @@ namespace Indicators {
                     var row = create_device_row(dev.name, dev.icon, false);
                     content_box.pack_start(row, false, false, 0);
                 }
-            } else {
                 var none = new Gtk.Label("No devices found");
                 none.get_style_context().add_class("dim-label");
                 none.margin = 8;

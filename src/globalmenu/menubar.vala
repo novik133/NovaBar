@@ -2,6 +2,7 @@
  * GlobalMenu - GTK Global Menu Widget
  * 
  * Displays application menus from GTK apps using org.gtk.Menus interface.
+ * Works on both X11 and Wayland.
  */
 
 namespace GlobalMenu {
@@ -16,9 +17,9 @@ namespace GlobalMenu {
     public class MenuBar : Gtk.Box {
         private Gtk.Label app_label;
         private Gtk.Box menu_box;
-        private Wnck.Screen wnck_screen;
-        private uint32 current_xid;
-        private uint32 panel_xid;
+        private Toplevel.Tracker tracker;
+        private uint32 current_id;
+        private bool first_update = true;
         
         private string? gtk_bus_name;
         private string? gtk_app_path;
@@ -34,48 +35,46 @@ namespace GlobalMenu {
             menu_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
             pack_start(menu_box, false, false, 0);
             
-            setup_window_tracking();
+            // Enable tracking on both X11 and Wayland
+            setup_tracking();
+            
             show_all();
         }
         
         public void set_panel_window(Gtk.Window panel) {
             panel.realize();
-            if (panel.get_window() != null) {
-                panel_xid = (uint32)((Gdk.X11.Window)panel.get_window()).get_xid();
+            if (panel.get_window() != null && Backend.is_x11()) {
+                tracker.set_panel_id(Backend.X11.get_window_xid(panel));
             }
         }
         
-        private void setup_window_tracking() {
-            wnck_screen = Wnck.Screen.get_default();
-            wnck_screen.active_window_changed.connect(on_active_window_changed);
-            
-            Idle.add(() => {
-                var win = wnck_screen.get_active_window();
-                if (win != null) on_active_window_changed(null);
-                return false;
-            });
+        private void setup_tracking() {
+            tracker = Toplevel.create_tracker();
+            tracker.active_window_changed.connect(on_window_changed);
+            tracker.start();
         }
         
-        private void on_active_window_changed(Wnck.Window? prev) {
-            var window = wnck_screen.get_active_window();
+        private void on_window_changed(Toplevel.WindowInfo? window) {
             if (window == null) return;
+            if (!first_update && window.id == current_id) return;
+            first_update = false;
             
-            var xid = (uint32)window.get_xid();
-            if (xid == current_xid || xid == panel_xid) return;
-            
-            var wtype = window.get_window_type();
-            if (wtype == Wnck.WindowType.DESKTOP || wtype == Wnck.WindowType.DOCK) return;
-            
-            current_xid = xid;
-            
-            var app = window.get_application();
-            app_label.set_text(app != null ? app.get_name() : window.get_name());
+            current_id = window.id;
+            app_label.set_text(window.app_id);
             
             menu_box.foreach((w) => menu_box.remove(w));
-            load_gtk_menu.begin(xid);
+            
+            if (Backend.is_x11()) {
+                load_menu_x11.begin(window.id);
+            } else {
+                // On Wayland, title contains the D-Bus bus name
+                if (window.title != null && window.title != "") {
+                    load_menu_wayland.begin(window.title);
+                }
+            }
         }
         
-        private async void load_gtk_menu(uint32 xid) {
+        private async void load_menu_x11(uint32 xid) {
             var display = (Gdk.X11.Display)Gdk.Display.get_default();
             unowned X.Display xdisplay = display.get_xdisplay();
             
@@ -89,6 +88,48 @@ namespace GlobalMenu {
             
             if (gtk_bus_name == null || menu_path == null) return;
             
+            yield load_menu_from_dbus(menu_path);
+        }
+        
+        private async void load_menu_wayland(string app_id) {
+            // On Wayland, app_id might be the bus name or we need to find it
+            gtk_bus_name = app_id;
+            gtk_app_path = "/org/gtk/Application";
+            gtk_win_path = null;
+            
+            // Try common menu paths
+            string[] paths = {
+                "/org/gtk/Application/menubar",
+                "/MenuBar",
+                "/org/gtk/Application/menus/menubar"
+            };
+            
+            foreach (var path in paths) {
+                if (yield try_load_menu(path)) break;
+            }
+        }
+        
+        private async bool try_load_menu(string path) {
+            try {
+                var conn = yield Bus.get(BusType.SESSION);
+                var builder = new VariantBuilder(new VariantType("au"));
+                for (uint i = 0; i < 10; i++) builder.add("u", i);
+                
+                var result = yield conn.call(
+                    gtk_bus_name, path, "org.gtk.Menus", "Start",
+                    new Variant("(au)", builder),
+                    new VariantType("(a(uuaa{sv}))"),
+                    DBusCallFlags.NONE, 500, null
+                );
+                
+                build_menu(result.get_child_value(0));
+                return true;
+            } catch (Error e) {
+                return false;
+            }
+        }
+        
+        private async void load_menu_from_dbus(string menu_path) {
             try {
                 var conn = yield Bus.get(BusType.SESSION);
                 var builder = new VariantBuilder(new VariantType("au"));

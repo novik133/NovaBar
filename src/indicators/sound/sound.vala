@@ -81,11 +81,9 @@ namespace Indicators {
         
         public SoundPopup(Sound ind) {
             Object(type: Gtk.WindowType.POPUP);
+            Backend.setup_popup(this, 28);
             this.indicator = ind;
             
-            set_decorated(false);
-            set_skip_taskbar_hint(true);
-            set_skip_pager_hint(true);
             set_keep_above(true);
             set_app_paintable(true);
             
@@ -133,16 +131,18 @@ namespace Indicators {
         
         private void ungrab() {
             var seat = Gdk.Display.get_default().get_default_seat();
-            seat.ungrab();
+            if (seat != null) seat.ungrab();
         }
         
         public void show_at(int x, int y) {
             show_all();
             int w, h;
             get_size(out w, out h);
-            move(x - w / 2, y);
+            Backend.position_popup(this, x, y, 28);
             var seat = Gdk.Display.get_default().get_default_seat();
-            seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+            if (Backend.is_x11() && seat != null && get_window() != null) {
+                seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+            }
             present();
         }
         

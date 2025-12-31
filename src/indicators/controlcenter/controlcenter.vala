@@ -38,9 +38,7 @@ namespace Indicators {
         
         public ControlCenterPopup() {
             Object(type: Gtk.WindowType.POPUP);
-            set_decorated(false);
-            set_skip_taskbar_hint(true);
-            set_skip_pager_hint(true);
+            Backend.setup_popup(this, 28);
             set_keep_above(true);
             set_app_paintable(true);
             
@@ -87,25 +85,20 @@ namespace Indicators {
         }
         
         private void ungrab() {
-            Gdk.Display.get_default().get_default_seat().ungrab();
+            var seat = Gdk.Display.get_default().get_default_seat();
+            if (seat != null) seat.ungrab();
         }
         
         public void show_at(int x, int y) {
             show_all();
-            int w, h;
-            get_size(out w, out h);
+            Backend.position_popup(this, x, y, 28);
             
-            // Keep popup on screen
-            var screen = get_screen();
-            int screen_width = screen.get_width();
-            if (x + w / 2 > screen_width) {
-                x = screen_width - w - 8;
-            } else {
-                x = x - w / 2;
+            if (Backend.is_x11()) {
+                var seat = Gdk.Display.get_default().get_default_seat();
+                if (seat != null && get_window() != null) {
+                    seat.grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
+                }
             }
-            
-            move(x, y);
-            Gdk.Display.get_default().get_default_seat().grab(get_window(), Gdk.SeatCapabilities.ALL, true, null, null, null);
             present();
         }
         

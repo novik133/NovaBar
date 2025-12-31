@@ -119,7 +119,7 @@ namespace Settings {
             name_label.get_style_context().add_class("about-os-name");
             box.pack_start(name_label, false, false, 0);
             
-            var version_label = new Gtk.Label("Version 0.1.0");
+            var version_label = new Gtk.Label("Version 0.1.1");
             version_label.get_style_context().add_class("dim-label");
             box.pack_start(version_label, false, false, 0);
             
