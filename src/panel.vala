@@ -16,6 +16,7 @@ public class NovaPanel : Gtk.Window {
         
         // Wayland: must init layer-shell BEFORE realize
         if (Backend.is_wayland()) {
+            Debug.log("Panel", "Setting up Wayland layer-shell...");
             Backend.Wayland.setup_panel_window(this, PANEL_HEIGHT);
         }
         
@@ -27,20 +28,31 @@ public class NovaPanel : Gtk.Window {
         
         // X11: setup after window hints
         if (Backend.is_x11()) {
+            Debug.log("Panel", "Setting up X11 panel window...");
             Backend.X11.setup_panel_window(this, PANEL_HEIGHT);
         }
         
+        Debug.log("Panel", "Setting up geometry...");
         setup_geometry();
+        Debug.log("Panel", "Setting up layout...");
         setup_layout();
+        Debug.log("Panel", "Loading CSS...");
         load_css();
         
+        Debug.log("Panel", "Calling show_all...");
         show_all();
+        Debug.log("Panel", "Panel construction complete");
     }
     
     private void setup_geometry() {
         var display = Gdk.Display.get_default();
         var monitor = display.get_primary_monitor() ?? display.get_monitor(0);
+        if (monitor == null) {
+            Debug.log("Panel", "ERROR: No monitor found");
+            return;
+        }
         var geom = monitor.get_geometry();
+        Debug.log("Panel", "Monitor geometry: %dx%d at %d,%d".printf(geom.width, geom.height, geom.x, geom.y));
         
         set_default_size(geom.width, PANEL_HEIGHT);
         

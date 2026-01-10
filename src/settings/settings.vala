@@ -248,9 +248,45 @@ namespace Settings {
             if (FileUtils.test(config_file, FileTest.EXISTS)) {
                 string icon;
                 FileUtils.get_contents(config_file, out icon);
-                return icon.strip();
+                var saved = icon.strip();
+                if (saved != "" && saved != "distributor-logo") {
+                    return saved;
+                }
             }
         } catch (Error e) {}
+        return detect_distro_icon();
+    }
+    
+    public string detect_distro_icon() {
+        string? distro_id = null;
+        try {
+            string contents;
+            if (FileUtils.get_contents("/etc/os-release", out contents)) {
+                foreach (var line in contents.split("\n")) {
+                    if (line.has_prefix("ID=")) {
+                        distro_id = line.substring(3).replace("\"", "").down();
+                        break;
+                    }
+                }
+            }
+        } catch (Error e) {}
+        
+        if (distro_id != null) {
+            // Try distro-specific icon names
+            string[] candidates = {
+                "distributor-logo-" + distro_id,
+                distro_id + "-logo",
+                distro_id
+            };
+            var theme = Gtk.IconTheme.get_default();
+            foreach (var icon in candidates) {
+                if (theme.has_icon(icon)) {
+                    return icon;
+                }
+            }
+        }
+        
+        // Fallback to generic
         return "distributor-logo";
     }
 }
