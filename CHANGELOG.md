@@ -5,6 +5,17 @@ All notable changes to NovaBar will be documented in this file.
 ## [0.1.1] - 2025-12-31
 
 ### Added
+- **Auto-detect Distribution Logo** - Automatically detects distro from `/etc/os-release`
+  - Tries icon names: `distributor-logo-{distro}`, `{distro}-logo`, `{distro}`
+  - Falls back to `distributor-logo` if no match found
+  - User-configured icon in Settings still takes priority
+
+- **Verbose Mode** - Run with `-v` or `--verbose` for detailed startup logs
+  - Shows environment detection (Display, Wayland, GDK_BACKEND)
+  - Logs backend initialization and component setup
+  - Useful for debugging startup issues
+
+### Previously Added
 - **Wayland Support** - Native Wayland support using gtk-layer-shell
   - Panel positioning with proper layer-shell anchors and exclusive zone
   - Popup windows work correctly on Wayland compositors
