@@ -1,0 +1,184 @@
+/* NovaBar Light Theme */
+
+.panel-container {
+    background: linear-gradient(to bottom, rgba(240, 240, 240, 0.95), rgba(220, 220, 220, 0.95));
+    color: #333;
+    padding: 0 4px;
+}
+
+.nova-logo {
+    font-size: 16px;
+    padding: 4px 8px;
+}
+
+.globalmenu-app-name {
+    font-weight: bold;
+    padding: 0 8px;
+    color: #333;
+}
+
+.indicator {
+    padding: 4px 6px;
+    min-width: 24px;
+    color: #333;
+}
+
+button.flat {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #333;
+}
+
+button.flat:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+menu {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    padding: 4px 0;
+    color: #333;
+}
+
+menuitem {
+    padding: 6px 12px;
+    color: #333;
+}
+
+menuitem:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+popover {
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+}
+
+popover contents {
+    border-radius: 12px;
+}
+
+.network-popup {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    padding: 4px;
+}
+
+.section-title {
+    font-weight: 600;
+    font-size: 13px;
+    color: #333;
+}
+
+.network-row {
+    padding: 6px 4px;
+    border-radius: 4px;
+    color: #333;
+}
+
+.network-row:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.dim-label {
+    opacity: 0.6;
+    font-size: 11px;
+}
+
+.control-tile {
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.control-tile.active {
+    background: #0a84ff;
+    color: white;
+}
+
+.control-label {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.notification-title {
+    font-weight: bold;
+    font-size: 13px;
+    color: #333;
+}
+
+.notification-body {
+    opacity: 0.8;
+    font-size: 12px;
+}
+
+.notification-close {
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 2px;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+.notification-close:hover {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.settings-section-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.about-os-name {
+    font-size: 24px;
+    font-weight: 300;
+}
+
+.about-display-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.about-display-frame {
+    border-radius: 8px;
+}
+
+calendar {
+    background: transparent;
+}
+
+.calendar-time {
+    font-size: 42px;
+    font-weight: 200;
+    color: #333;
+}
+
+.calendar-month {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.calendar-day-header {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.5;
+    padding: 4px;
+}
+
+.calendar-day {
+    border-radius: 16px;
+    padding: 4px;
+    color: #333;
+}
+
+.calendar-today {
+    background: #0a84ff;
+    border-radius: 16px;
+    padding: 4px;
+    color: white;
+    font-weight: 600;
+}

@@ -1,0 +1,31 @@
+# Build directories
+build/
+_build/
+
+# IDE files
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*~
+*.swp
+*.swo
+
+# Compiled binaries
+novabar
+
+# Log files
+*.log
+
+# Cache directories
+.cache/
+
+# Package files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
