@@ -1,0 +1,294 @@
+# Spanish translation for NovaBar
+# Copyright (C) 2025-2026 Kamil 'Novik' Nowicki
+# This file is distributed under the same license as the NovaBar package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: novabar 0.1.3\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-06 11:46+0000\n"
+"PO-Revision-Date: 2026-02-06 11:46+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Desktop file
+#: novabar.desktop:3 novabar-autostart.desktop:3
+msgid "NovaBar"
+msgstr "NovaBar"
+
+#: novabar.desktop:4 novabar-autostart.desktop:4
+msgid "Modern macOS-style panel for Linux"
+msgstr "Panel moderno estilo macOS para Linux"
+
+#. LogoMenu items
+#: src/logomenu/logomenu.vala
+msgid "About This Computer"
+msgstr "Acerca de este ordenador"
+
+#: src/logomenu/logomenu.vala
+msgid "System Settings..."
+msgstr "Ajustes del sistema..."
+
+#: src/logomenu/logomenu.vala
+msgid "App Store..."
+msgstr "Tienda de aplicaciones..."
+
+#: src/logomenu/logomenu.vala
+msgid "Force Quit..."
+msgstr "Forzar salida..."
+
+#: src/logomenu/logomenu.vala
+msgid "Sleep"
+msgstr "Suspender"
+
+#: src/logomenu/logomenu.vala
+msgid "Restart..."
+msgstr "Reiniciar..."
+
+#: src/logomenu/logomenu.vala
+msgid "Shut Down..."
+msgstr "Apagar..."
+
+#: src/logomenu/logomenu.vala
+msgid "Lock Screen"
+msgstr "Bloquear pantalla"
+
+#: src/logomenu/logomenu.vala
+msgid "Log Out..."
+msgstr "Cerrar sesión..."
+
+#. Panel context menu
+#: src/panel.vala
+msgid "NovaBar Settings..."
+msgstr "Ajustes de NovaBar..."
+
+#. Settings window
+#: src/settings/settings.vala
+msgid "NovaBar Settings"
+msgstr "Ajustes de NovaBar"
+
+#: src/settings/settings.vala
+msgid "Appearance"
+msgstr "Apariencia"
+
+#: src/settings/settings.vala
+msgid "Network"
+msgstr "Red"
+
+#: src/settings/settings.vala
+msgid "About"
+msgstr "Acerca de"
+
+#: src/settings/settings.vala
+msgid "Settings"
+msgstr "Ajustes"
+
+#: src/settings/settings.vala
+msgid "Customize the look and feel of your panel"
+msgstr "Personaliza la apariencia de tu panel"
+
+#: src/settings/settings.vala
+msgid "Color scheme"
+msgstr "Esquema de colores"
+
+#: src/settings/settings.vala
+msgid "Choose between light and dark appearance"
+msgstr "Elige entre apariencia clara y oscura"
+
+#: src/settings/settings.vala
+msgid "Dark"
+msgstr "Oscuro"
+
+#: src/settings/settings.vala
+msgid "Light"
+msgstr "Claro"
+
+#: src/settings/settings.vala
+msgid "Logo icon"
+msgstr "Icono del logo"
+
+#: src/settings/settings.vala
+msgid "Icon name or custom image file for the panel menu"
+msgstr "Nombre de icono o archivo de imagen personalizado para el menú del panel"
+
+#: src/settings/settings.vala
+msgid "Apply"
+msgstr "Aplicar"
+
+#: src/settings/settings.vala
+msgid "Network settings for the enhanced indicator"
+msgstr "Ajustes de red para el indicador mejorado"
+
+#: src/settings/settings.vala
+msgid "Auto-connect"
+msgstr "Conexión automática"
+
+#: src/settings/settings.vala
+msgid "Automatically connect to known networks"
+msgstr "Conectar automáticamente a redes conocidas"
+
+#: src/settings/settings.vala
+msgid "Notifications"
+msgstr "Notificaciones"
+
+#: src/settings/settings.vala
+msgid "Show network change notifications"
+msgstr "Mostrar notificaciones de cambio de red"
+
+#: src/settings/settings.vala
+msgid "Bandwidth monitor"
+msgstr "Monitor de ancho de banda"
+
+#: src/settings/settings.vala
+msgid "Show real-time bandwidth usage"
+msgstr "Mostrar uso de ancho de banda en tiempo real"
+
+#: src/settings/settings.vala
+msgid "Version 0.1.3"
+msgstr "Versión 0.1.3"
+
+#: src/settings/settings.vala
+msgid "Created by Kamil 'Novik' Nowicki"
+msgstr "Creado por Kamil 'Novik' Nowicki"
+
+#: src/settings/settings.vala
+msgid "GitHub Repository"
+msgstr "Repositorio de GitHub"
+
+#: src/settings/settings.vala
+msgid "Report an Issue"
+msgstr "Reportar un problema"
+
+#: src/settings/settings.vala
+msgid "Support on Ko-fi"
+msgstr "Apoyar en Ko-fi"
+
+#: src/settings/settings.vala
+msgid "Select Icon Image"
+msgstr "Seleccionar imagen de icono"
+
+#: src/settings/settings.vala
+msgid "Image files"
+msgstr "Archivos de imagen"
+
+#: src/settings/settings.vala
+msgid "All files"
+msgstr "Todos los archivos"
+
+#. About This Computer window
+#: src/about/about.vala
+msgid "System"
+msgstr "Sistema"
+
+#: src/about/about.vala
+msgid "Overview"
+msgstr "Resumen"
+
+#: src/about/about.vala
+msgid "Displays"
+msgstr "Pantallas"
+
+#: src/about/about.vala
+msgid "Storage"
+msgstr "Almacenamiento"
+
+#: src/about/about.vala
+msgid "Connected monitors and their resolutions"
+msgstr "Monitores conectados y sus resoluciones"
+
+#: src/about/about.vala
+msgid "Disk usage and available space"
+msgstr "Uso de disco y espacio disponible"
+
+#: src/about/about.vala
+msgid "No display information available"
+msgstr "No hay información de pantalla disponible"
+
+#: src/about/about.vala
+msgid "No storage information available"
+msgstr "No hay información de almacenamiento disponible"
+
+#: src/about/about.vala
+msgid "Kernel"
+msgstr "Kernel"
+
+#: src/about/about.vala
+msgid "Processor"
+msgstr "Procesador"
+
+#: src/about/about.vala
+msgid "Memory"
+msgstr "Memoria"
+
+#: src/about/about.vala
+msgid "Graphics"
+msgstr "Gráficos"
+
+#: src/about/about.vala
+msgid "%s available of %s"
+msgstr "%s disponible de %s"
+
+#. Indicator popups
+#: src/indicators/sound/sound.vala
+msgid "Sound Settings..."
+msgstr "Ajustes de sonido..."
+
+#: src/indicators/bluetooth/bluetooth.vala
+msgid "Bluetooth Settings..."
+msgstr "Ajustes de Bluetooth..."
+
+#: src/indicators/battery/battery.vala
+msgid "Power Settings..."
+msgstr "Ajustes de energía..."
+
+#: src/indicators/network/network.vala
+msgid "Network Settings..."
+msgstr "Ajustes de red..."
+
+#. WiFi panel
+#: src/indicators/network/enhanced/ui/wifi_panel.vala
+msgid "Connect"
+msgstr "Conectar"
+
+#: src/indicators/network/enhanced/ui/wifi_panel.vala
+msgid "Disconnect"
+msgstr "Desconectar"
+
+#: src/indicators/network/enhanced/ui/wifi_panel.vala
+msgid "Hidden Network"
+msgstr "Red oculta"
+
+#: src/indicators/network/enhanced/ui/wifi_panel.vala
+msgid "Forget Network"
+msgstr "Olvidar red"
+
+#: src/indicators/network/enhanced/ui/wifi_panel.vala
+msgid "Properties"
+msgstr "Propiedades"
+
+#. Ethernet panel
+#: src/indicators/network/enhanced/ui/ethernet_panel.vala
+msgid "Configure"
+msgstr "Configurar"
+
+#. Hotspot panel
+#: src/indicators/network/enhanced/ui/hotspot_panel.vala
+msgid "Generate"
+msgstr "Generar"
+
+#: src/indicators/network/enhanced/ui/hotspot_panel.vala
+msgid "Start Hotspot"
+msgstr "Iniciar hotspot"
+
+#: src/indicators/network/enhanced/ui/hotspot_panel.vala
+msgid "Stop Hotspot"
+msgstr "Detener hotspot"
+
+#: src/indicators/network/enhanced/ui/hotspot_panel.vala
+msgid "At least 8 characters"
+msgstr "Al menos 8 caracteres"

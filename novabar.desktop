@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=NovaBar
+Comment=Modern macOS-style panel for Linux
+Exec=novabar
+Icon=novabar
+Categories=System;Settings;DesktopSettings;
+Keywords=panel;bar;dock;desktop;
+StartupNotify=false
+NoDisplay=false
