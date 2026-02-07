@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=com.canonical.AppMenu.Registrar
-Exec=/usr/bin/novabar
