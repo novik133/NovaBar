@@ -2,10 +2,11 @@
 Type=Application
 Name=NovaBar
 Comment=Modern macOS-style panel for Linux
-Exec=novabar
+Exec=sh -c 'export GTK_MODULES="${GTK_MODULES:+$GTK_MODULES:}appmenu-gtk-module"; dbus-update-activation-environment GTK_MODULES 2>/dev/null; xfconf-query -c xsettings -p /Gtk/ShellShowsMenubar -t bool -s true --create 2>/dev/null; xfconf-query -c xsettings -p /Gtk/ShellShowsAppMenu -t bool -s true --create 2>/dev/null; exec novabar'
 Icon=novabar
 Categories=System;
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Panel
 StartupNotify=false

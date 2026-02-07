@@ -1,5 +1,5 @@
 project('novabar', 'vala', 'c',
-  version: '0.1.3',
+  version: '0.1.4',
   meson_version: '>= 0.50.0',
 )
 
@@ -71,6 +71,8 @@ sources = files(
   
   # Global Menu
   'src/globalmenu/menubar.vala',
+  'src/globalmenu/registrar.vala',
+  'src/globalmenu/dbusmenu_client.vala',
   
   # Logo Menu
   'src/logomenu/logomenu.vala',
@@ -81,6 +83,7 @@ sources = files(
   'src/indicators/network/network.vala',
   'src/indicators/network/enhanced_wrapper.vala',
   'src/indicators/bluetooth/bluetooth.vala',
+  'src/indicators/bluetooth/enhanced_wrapper.vala',
   'src/indicators/battery/battery.vala',
   'src/indicators/notifications/notifications.vala',
   'src/indicators/controlcenter/controlcenter.vala',
@@ -93,6 +96,44 @@ sources = files(
   'src/indicators/network/enhanced/models/hotspot_configuration.vala',
   'src/indicators/network/enhanced/models/mobile_connection.vala',
   'src/indicators/network/enhanced/models/network_profile.vala',
+  
+  # Enhanced Bluetooth Indicator Models
+  'src/indicators/bluetooth/enhanced/models/enums.vala',
+  'src/indicators/bluetooth/enhanced/models/bluetooth_adapter.vala',
+  'src/indicators/bluetooth/enhanced/models/bluetooth_device.vala',
+  'src/indicators/bluetooth/enhanced/models/audio_profile.vala',
+  'src/indicators/bluetooth/enhanced/models/file_transfer.vala',
+  'src/indicators/bluetooth/enhanced/models/pairing_request.vala',
+  'src/indicators/bluetooth/enhanced/models/bluetooth_error.vala',
+  
+  # Enhanced Bluetooth Indicator Managers
+  'src/indicators/bluetooth/enhanced/managers/bluez_client.vala',
+  'src/indicators/bluetooth/enhanced/managers/adapter_manager.vala',
+  'src/indicators/bluetooth/enhanced/managers/device_manager.vala',
+  'src/indicators/bluetooth/enhanced/managers/agent_manager.vala',
+  'src/indicators/bluetooth/enhanced/managers/audio_manager.vala',
+  'src/indicators/bluetooth/enhanced/managers/transfer_manager.vala',
+  
+  # Enhanced Bluetooth Indicator Utils
+  'src/indicators/bluetooth/enhanced/utils/error_handler.vala',
+  'src/indicators/bluetooth/enhanced/utils/config_manager.vala',
+  'src/indicators/bluetooth/enhanced/utils/polkit_client.vala',
+  
+  # Enhanced Bluetooth Indicator Controller
+  'src/indicators/bluetooth/enhanced/bluetooth_controller.vala',
+  
+  # Enhanced Bluetooth Indicator Main Component
+  'src/indicators/bluetooth/enhanced/bluetooth_indicator.vala',
+  'src/indicators/bluetooth/enhanced/notification_manager.vala',
+  
+  # Enhanced Bluetooth Indicator UI Components
+  'src/indicators/bluetooth/enhanced/ui/bluetooth_panel.vala',
+  'src/indicators/bluetooth/enhanced/ui/bluetooth_popover.vala',
+  'src/indicators/bluetooth/enhanced/ui/device_detail_view.vala',
+  'src/indicators/bluetooth/enhanced/ui/pairing_dialog.vala',
+  'src/indicators/bluetooth/enhanced/ui/settings_panel.vala',
+  'src/indicators/bluetooth/enhanced/ui/keyboard_navigation.vala',
+  'src/indicators/bluetooth/enhanced/ui/accessibility_helper.vala',
   
   # Enhanced Network Indicator Core Components
   'src/indicators/network/enhanced/nm_client.vala',

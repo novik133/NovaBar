@@ -460,7 +460,7 @@ namespace Settings {
             page.pack_start(name_label, false, false, 0);
             
             // Version
-            var version_label = new Gtk.Label("Version 0.1.3");
+            var version_label = new Gtk.Label("Version 0.1.4");
             version_label.get_style_context().add_class("nova-about-version");
             page.pack_start(version_label, false, false, 0);
             

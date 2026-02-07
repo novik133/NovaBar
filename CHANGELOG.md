@@ -2,6 +2,143 @@
 
 All notable changes to NovaBar will be documented in this file.
 
+## [0.1.4] - 2026-02-07
+
+### Added
+- **Enhanced Bluetooth Indicator** - Complete Bluetooth management system integrated into NovaBar
+  - Comprehensive adapter management with power control, discoverable/pairable modes, and alias configuration
+  - Device management with pairing, connection, trust, and removal operations
+  - Audio profile support with A2DP, HSP, HFP, and AVRCP profile switching
+  - File transfer support with OBEX protocol integration and progress tracking
+  - Pairing agent with PIN/passkey dialogs and confirmation handling
+  - Real-time device discovery with automatic scanning
+  - Configuration persistence with adapter settings and device preferences
+  - PolicyKit integration for secure privilege escalation
+  - Comprehensive error handling with automatic recovery mechanisms
+  - Full keyboard navigation and screen reader support for accessibility
+
+- **Bluetooth Management UI Components**
+  - Main Bluetooth indicator with dynamic status icons and notification system
+  - Bluetooth popover with device list, scanning controls, and quick settings
+  - Device detail view with connection status, battery level, and audio profile controls
+  - Pairing dialog with PIN/passkey entry and confirmation prompts
+  - Settings panel for adapter configuration and preferences
+  - Keyboard navigation support with arrow keys, Enter, and Escape
+  - Accessibility helper with ARIA labels and screen reader announcements
+
+- **BlueZ D-Bus Integration**
+  - Complete D-Bus API integration for all Bluetooth operations
+  - Asynchronous device discovery and state monitoring
+  - Adapter detection and management with property change notifications
+  - Device property tracking including battery level, RSSI, and connection state
+  - Agent registration for pairing and authorization requests
+  - Audio profile management with MediaControl1 interface support
+
+- **Integration Wrapper**
+  - Factory function for creating Bluetooth indicator instances
+  - Seamless integration with existing NovaBar indicator system
+  - Enhanced Bluetooth indicator now default (no feature flag required)
+
+- **Global Menu Support** - Fully working global menu for applications that export menus via D-Bus
+  - Implemented `com.canonical.AppMenu.Registrar` D-Bus service so apps can register their menus with NovaBar
+  - Implemented `com.canonical.dbusmenu` client for reading menu trees from Qt, Electron, and other dbusmenu-capable apps
+  - Support for `org.gtk.Menus` protocol via `appmenu-gtk-module` for GTK3/4 applications
+  - Automatic session-wide environment setup on startup:
+    - `GTK_MODULES=appmenu-gtk-module` propagated via D-Bus activation env, systemd user env, `~/.xprofile`, and `~/.config/environment.d/`
+    - `gtk-shell-shows-menubar=true` set via xfconf (XFCE), `gtk-3.0/settings.ini` (fallback)
+    - GTK3 CSS override to collapse in-app menubars to zero height
+  - D-Bus service file for `com.canonical.AppMenu.Registrar` auto-activation
+  - Multi-strategy menu discovery: AppMenu Registrar → X11 properties → GMenuModel paths → dbusmenu paths → PID-based discovery
+  - Full submenu support with separators, checkboxes, radio items, keyboard shortcuts, and disabled states
+  - `AboutToShow` support for lazy-loading submenus (apps populate on demand)
+  - `LayoutUpdated` / `ItemsPropertiesUpdated` signal handling for live menu updates
+  - In-app menubar hidden automatically when menu is exported to NovaBar
+  - Works on both X11 and Wayland
+  - Autostart desktop file runs in Panel phase before other apps, sets environment early
+
+### Fixed
+- **Critical Stability Issues** - Resolved segmentation faults and crashes
+  - Fixed null pointer dereference in BlueZ client interface enumeration
+  - Added null checks before accessing D-Bus interface info
+  - Made agent registration non-fatal to handle conflicts with other Bluetooth managers
+  - Fixed agent registration failure when blueman or gnome-bluetooth already registered
+
+- **Settings Button** - Fixed Bluetooth settings application launcher
+  - Changed from invalid `settings://bluetooth` URI to trying common Bluetooth settings apps
+  - Attempts to launch: gnome-control-center, blueman-manager, blueberry, systemsettings5
+  - Graceful fallback with error notification if no settings app found
+
+- **Device Discovery** - Fixed devices not appearing during initialization
+  - Added automatic device scan during controller initialization
+  - Scans all adapters for devices after adapter manager initializes
+  - Ensures existing paired devices are discovered on startup
+
+- **Bluetooth Adapter Not Detected** - Fixed BlueZ D-Bus interface enumeration
+  - Root cause: `DBusObjectManagerClient` returns `null` from `get_info()` for BlueZ interfaces since it lacks pre-loaded introspection data
+  - `get_objects_by_interface()` always returned empty results because `info != null` check failed for every interface
+  - Fix: Fall back to `((DBusProxy) interface_obj).get_interface_name()` when `get_info()` returns null
+  - Same fix applied to `on_interface_added` and `on_interface_removed` signal handlers to prevent null dereference crashes
+
+- **Bluetooth Properties Parsing** - Fixed D-Bus `GetAll` return value parsing
+  - Root cause: `result.get("(@a{sv})", out properties)` produced a garbage `HashTable` (size showed as ~3.8 billion)
+  - Adapter properties were never loaded, causing "No adapter available" in the UI
+  - Fix: Manually extract the dict variant with `get_child_value(0)` and iterate entries with `iter.next("{sv}")`
+
+- **Scan Button Not Discovering Devices** - Fixed async method invocation
+  - Root cause: `start_discovery()` and `stop_discovery()` are async methods but were called from sync `on_scan_clicked()` without `.begin()`, so they never executed
+  - Fix: Use `.begin()` to properly invoke async discovery methods from the sync click handler
+
+- **Popup Closing on ComboBox/Filter Interaction** - Fixed input handling in Bluetooth popover
+  - Root cause: `focus_out_event` handler unconditionally closed the popup; ComboBox dropdowns steal focus when opened, triggering the close
+  - Additional cause: `seat.grab(ALL)` captured keyboard input, preventing ComboBox dropdowns from functioning
+  - Fix: Removed `focus_out_event` close handler; changed seat grab from `ALL` to `ALL_POINTING` (pointer only)
+
+- **BlueZ Property Change Notifications Not Received** - Fixed D-Bus signal subscription
+  - Root cause: `properties_changed` signal was only emitted for proxies created via `get_proxy()`, but adapter/device managers use `call_method()` directly
+  - Adapter `Discovering` state changes and device `Connected` state changes were never forwarded to the UI
+  - Fix: Added global D-Bus subscription for `org.freedesktop.DBus.Properties.PropertiesChanged` signal
+
+- **New Devices Not Appearing During Discovery** - Fixed object added signal handling
+  - Root cause: `on_object_added` only logged the event but didn't enumerate interfaces; `on_interface_added` only fires for interfaces added *after* the object exists, not for the initial set
+  - Newly discovered devices arrived with all interfaces at once (Device1, MediaControl1, etc.) but DeviceManager never received the Device1 notification
+  - Fix: `on_object_added` now enumerates all interfaces on the new object and emits `object_added` for each
+
+- **Compilation Errors** - Fixed 8+ Vala compilation issues
+  - Fixed HashTable method: `clear()` → `remove_all()`
+  - Fixed GenericArray property: `size` → `length` (4 locations)
+  - Fixed enum switch statements converted to if-else chains
+  - Fixed GenericArray method: `first_match()` → manual loop
+  - Fixed ConfigManager method call: `get_configuration()` → `get_ui_preferences()`
+  - Fixed property access in settings panel with enum-to-string conversion
+  - Fixed lambda closure issues with captured variables
+  - Fixed sort method signature: `sort()` → `sort_with_data()`
+
+### Changed
+- Enhanced Bluetooth indicator is now the default (replaces basic Bluetooth indicator)
+- Bluetooth indicator integrated directly into panel without environment variable
+- Improved error messages throughout Bluetooth operations
+- Enhanced accessibility with comprehensive ARIA labels and keyboard shortcuts
+
+### Resolved Known Issues from 0.1.3
+- **Device List Not Populating on First Launch** - Fixed signal/event flow timing
+  - Root cause: `connect_manager_signals()` was called *after* `device_manager.initialize()` and `scan_devices()`
+  - All `device_found` signals emitted during the initial scan were lost because the controller hadn't connected its signal forwarding yet
+  - Fix: Manager objects are now created first, signals are connected, and *then* initialization/scanning runs so all events are captured
+  
+- **Agent Registration Conflicts with Other Bluetooth Managers** - Fixed coexistence with blueman/gnome-bluetooth
+  - Root cause: `register_agent()` tried `RegisterAgent` + `RequestDefaultAgent` as a single atomic operation — if either failed, the agent was never registered
+  - Fix: Multi-strategy registration: (1) try normal registration, (2) if `AlreadyExists`, unregister first then retry, (3) `RequestDefaultAgent` failure is now non-fatal — NovaBar still registers as a non-default agent and can handle pairing when the other manager isn't active
+  
+- **Devices Requiring Manual Scanning to Appear** - Fixed automatic device discovery
+  - Root cause: Initial `scan_all_devices()` only queried BlueZ for already-known D-Bus objects but never triggered actual Bluetooth radio discovery
+  - Fix: After initialization, `auto_start_discovery()` starts Bluetooth radio scanning on all powered adapters for 15 seconds, then automatically stops to save power — nearby devices now appear without user interaction
+
+### Technical Details
+- **Architecture**: Modular design with clear separation between Bluetooth management logic, UI components, and system integration
+- **Components**: 6 specialized managers for adapters, devices, agents, audio, transfers, and BlueZ client
+- **Data Models**: Comprehensive models for adapters, devices, audio profiles, file transfers, and pairing requests
+- **Integration**: Seamless integration with existing NovaBar indicator system and settings
+
 ## [0.1.3] - 2026-02-06
 
 ### Added

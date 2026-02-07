@@ -107,8 +107,8 @@ public class NovaPanel : Gtk.Window {
         right_box.pack_end(new Indicators.Battery(), false, false, 0);
         Debug.log("Panel", "Creating Sound indicator...");
         right_box.pack_end(new Indicators.Sound(), false, false, 0);
-        Debug.log("Panel", "Creating Bluetooth indicator...");
-        right_box.pack_end(new Indicators.Bluetooth(), false, false, 0);
+        Debug.log("Panel", "Creating Enhanced Bluetooth indicator...");
+        right_box.pack_end(new Indicators.Enhanced.BluetoothIndicator(), false, false, 0);
         Debug.log("Panel", "Creating Enhanced Network indicator...");
         right_box.pack_end(new Indicators.Enhanced.NetworkIndicator(), false, false, 0);
         Debug.log("Panel", "All indicators created successfully");

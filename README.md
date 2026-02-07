@@ -8,7 +8,7 @@ A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 ## Features
 
 ### Core Components
-- **Global Menu Bar** - Application menus integrated into the panel (X11), focused window title (Wayland)
+- **Global Menu Bar** - Application menus integrated into the panel, supporting both `org.gtk.Menus` and `com.canonical.dbusmenu` protocols
 - **Logo Menu** - System actions menu with Nova branding
 - **System Indicators** - Network, Bluetooth, Sound, Battery, DateTime, Notifications
 - **Control Center** - Quick access to system settings
@@ -17,8 +17,11 @@ A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 ### Key Features
 - **macOS-style Design** - Clean, modern interface with transparency effects
 - **X11 & Wayland Support** - Native support for both display servers
-- **Global Menu Integration** - Application menus appear in the panel (X11)
+- **Global Menu Integration** - Application menus appear in the panel with automatic in-app menubar hiding
+- **AppMenu Registrar** - Built-in `com.canonical.AppMenu.Registrar` D-Bus service for menu registration
 - **Window Tracking** - Shows focused window on Wayland via wlr-foreign-toplevel
+- **Enhanced Bluetooth** - Full Bluetooth management with pairing, audio profiles, and file transfer
+- **Enhanced Network** - Comprehensive network management with WiFi, VPN, hotspot, and bandwidth monitoring
 - **System Tray Replacement** - Modern indicators replace traditional system tray
 - **Theme Support** - Dark and light themes with CSS customization
 - **Modular Architecture** - Easy to extend with new indicators and components
@@ -50,6 +53,12 @@ A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 - gtk-layer-shell (panel positioning)
 - wayland-client (protocol support)
 
+### Global Menu Dependencies
+- **appmenu-gtk3-module** (required) - Intercepts GTK3 application menubars and exports them via D-Bus
+- **appmenu-gtk2-module** (optional) - Same for legacy GTK2 applications
+
+> **Note:** NovaBar automatically configures `GTK_MODULES`, `gtk-shell-shows-menubar`, and other settings on first run. A **logout/login** is required after first launch for all applications to pick up the global menu environment.
+
 ### Build Dependencies
 - Vala compiler
 - Meson build system (>= 0.50.0)
@@ -61,7 +70,7 @@ A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 ### Runtime Requirements
 - X11 or Wayland (wlroots-based: labwc, sway, wayfire, etc.)
 - XFCE or compatible desktop environment
-- appmenu-gtk-module (for global menu support on X11)
+- appmenu-gtk3-module (for global menu support)
 
 ## Installation
 
@@ -72,14 +81,24 @@ A modern, modular macOS-style panel for Linux supporting both X11 and Wayland.
 sudo apt install valac meson ninja-build pkg-config gettext \
     libgtk-3-dev libglib2.0-dev libgio2.0-dev \
     libgdk-x11-3.0-dev libwnck-3-dev libx11-dev \
-    libnm-dev libsoup-3.0-dev appmenu-gtk-module \
-    libgtk-layer-shell-dev libwayland-dev
+    libnm-dev libsoup-3.0-dev \
+    libgtk-layer-shell-dev libwayland-dev \
+    appmenu-gtk3-module
 ```
 
 **Arch Linux:**
 ```bash
 sudo pacman -S vala meson ninja pkgconf gtk3 libwnck3 \
-    networkmanager libsoup3 gtk-layer-shell wayland gettext
+    networkmanager libsoup3 gtk-layer-shell wayland gettext \
+    appmenu-gtk-module
+```
+
+**Fedora:**
+```bash
+sudo dnf install vala meson ninja-build pkgconf gtk3-devel libwnck3-devel \
+    NetworkManager-libnm-devel libsoup3-devel \
+    gtk-layer-shell-devel wayland-devel gettext \
+    libdbusmenu-gtk3
 ```
 
 2. **Clone and build**:
@@ -108,38 +127,50 @@ novabar
 
 ### Auto-start Setup
 
-Create desktop entry for auto-start:
+The autostart file is installed automatically. To set up manually:
 ```bash
 mkdir -p ~/.config/autostart
-cat > ~/.config/autostart/novabar.desktop << EOF
-[Desktop Entry]
-Type=Application
-Name=NovaBar
-Exec=novabar
-Hidden=false
-NoDisplay=false
-X-GNOME-Autostart-enabled=true
-EOF
+cp /etc/xdg/autostart/novabar-autostart.desktop ~/.config/autostart/
 ```
+
+NovaBar's autostart entry runs in the **Panel** phase (before other applications) to ensure the global menu registrar and environment are ready before apps launch.
 
 ## Configuration
 
-### Global Menu Setup (X11)
+### Global Menu Setup
 
-For applications to show menus in the panel:
+NovaBar handles global menu configuration **automatically** on startup. It:
 
-1. **Install appmenu support**:
+1. Sets `GTK_MODULES=appmenu-gtk-module` in the session environment
+2. Propagates the setting via `dbus-update-activation-environment`, `~/.xprofile`, and `~/.config/environment.d/`
+3. Sets `gtk-shell-shows-menubar=true` via xfconf (XFCE) and `gtk-3.0/settings.ini`
+4. Writes a GTK3 CSS override to hide in-app menubars
+5. Starts the `com.canonical.AppMenu.Registrar` D-Bus service
+
+**The only manual step required is installing the module:**
 ```bash
-sudo apt install appmenu-gtk2-module appmenu-gtk3-module
+# Ubuntu/Debian
+sudo apt install appmenu-gtk3-module
+
+# Arch Linux
+sudo pacman -S appmenu-gtk-module
 ```
 
-2. **Set environment variables**:
-```bash
-export UBUNTU_MENUPROXY=1
-export APPMENU_DISPLAY_BOTH=1
-```
+**After first launch, log out and log back in** so all applications pick up the `GTK_MODULES` environment variable.
 
-Add to `~/.profile` or `~/.xsessionrc` for persistence.
+#### How It Works
+
+- `appmenu-gtk-module` intercepts `GtkMenuBar` widgets in GTK applications
+- The module exports menus via `org.gtk.Menus` D-Bus interface
+- NovaBar reads these menus and displays them in the panel
+- The in-app menubar is automatically hidden (collapsed to zero height)
+- NovaBar also hosts a `com.canonical.AppMenu.Registrar` for apps using `com.canonical.dbusmenu` (Qt, Electron, etc.)
+
+#### Troubleshooting Global Menu
+
+- **Menus not appearing:** Ensure `appmenu-gtk3-module` is installed and you have logged out/in after first NovaBar launch
+- **Menu shows in both panel and app:** The app was launched before NovaBar configured the environment — restart the app
+- **Specific app not working:** Some apps (e.g. Firefox with native titlebar) don't use GtkMenuBar and won't export menus
 
 ### Wayland Setup
 
@@ -183,6 +214,9 @@ NovaBar/
 │   │   ├── wlr-toplevel.h     # Header
 │   │   └── wlr-toplevel.vapi  # Vala bindings
 │   ├── globalmenu/            # Global menu integration
+│   │   ├── menubar.vala       # Menu bar widget (org.gtk.Menus + dbusmenu)
+│   │   ├── registrar.vala     # com.canonical.AppMenu.Registrar service
+│   │   └── dbusmenu_client.vala # com.canonical.dbusmenu client
 │   ├── logomenu/              # Nova logo menu
 │   ├── indicators/            # System indicators
 │   │   ├── network/
@@ -198,6 +232,7 @@ NovaBar/
 ├── data/
 │   ├── novaos.css             # Dark theme stylesheet
 │   ├── novaos-light.css       # Light theme stylesheet
+│   ├── com.canonical.AppMenu.Registrar.service  # D-Bus service file
 │   └── icons/                 # Application icons
 ├── po/                        # Translation files (.po/.pot)
 │   ├── novabar.pot            # Translation template
@@ -238,10 +273,11 @@ ninja -C build
 
 ## Troubleshooting
 
-### Global Menu Not Working (X11)
-- Ensure `appmenu-gtk-module` is installed
-- Check environment variables are set
-- Restart applications after setup
+### Global Menu Not Working
+- Ensure `appmenu-gtk3-module` is installed: `sudo apt install appmenu-gtk3-module`
+- Log out and log back in after first NovaBar launch
+- Restart applications that were running before NovaBar started
+- Verify with: `echo $GTK_MODULES` (should contain `appmenu-gtk-module`)
 
 ### Panel Not Appearing
 - Check X11/Wayland compatibility
